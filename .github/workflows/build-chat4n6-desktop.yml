@@ -1,0 +1,30 @@
+name: Build Original chat4n6 Desktop Forensic Engine
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out Kay's app repository
+        uses: actions/checkout@v4
+      - name: Clone original chat4n6 upstream
+        run: git clone --depth 1 https://github.com/SecurityRonin/chat4n6.git upstream-chat4n6
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Compile upstream forensic CLI
+        run: cd upstream-chat4n6 && cargo build --locked --release -p chat4n6
+      - name: Archive original executable and MIT license
+        run: |
+          mkdir -p dist
+          cp upstream-chat4n6/target/release/chat4n6 dist/
+          cp upstream-chat4n6/LICENSE dist/LICENSE-chat4n6.txt
+      - name: Upload desktop binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-chat4n6-linux-x64
+          path: dist/
